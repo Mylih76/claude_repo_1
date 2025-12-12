@@ -1,0 +1,577 @@
+{
+  "info": {
+    "_postman_id": "real-estate-crm-api",
+    "name": "Real Estate CRM API",
+    "description": "API collection for Real Estate CRM & Matching Platform",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "{{baseUrl}}"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"agent@example.com\",\n  \"password\": \"SecurePass123!\",\n  \"name\": \"Test Agent\",\n  \"phone\": \"+905551234567\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('token', response.accessToken);",
+                  "    pm.environment.set('userId', response.user.id);",
+                  "    pm.test('Token saved to environment', function() {",
+                  "        pm.expect(pm.environment.get('token')).to.not.be.empty;",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"agent@example.com\",\n  \"password\": \"SecurePass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('token', response.accessToken);",
+                  "    pm.environment.set('userId', response.user.id);",
+                  "    pm.test('Token saved to environment', function() {",
+                  "        pm.expect(pm.environment.get('token')).to.not.be.empty;",
+                  "    });",
+                  "}",
+                  "",
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has accessToken', function() {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('accessToken');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "me"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has user data', function() {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('id');",
+                  "    pm.expect(response).to.have.property('email');",
+                  "    pm.expect(response).to.have.property('name');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Listings",
+      "item": [
+        {
+          "name": "Create Listing",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"listingType\": \"sale\",\n  \"propertyType\": \"apartment\",\n  \"title\": \"3+1 Deniz Manzaralı Daire\",\n  \"description\": \"Kadıköy Moda'da eşsiz deniz manzaralı, yeni tadilatlı daire.\",\n  \"price\": 2500000,\n  \"currency\": \"TRY\",\n  \"grossSqm\": 150,\n  \"netSqm\": 130,\n  \"roomCount\": \"3+1\",\n  \"buildingAge\": 5,\n  \"floorNumber\": 8,\n  \"totalFloors\": 12,\n  \"isFurnished\": false,\n  \"heatingType\": \"central\",\n  \"viewType\": \"sea\",\n  \"isInComplex\": true,\n  \"dues\": 1500,\n  \"city\": \"İstanbul\",\n  \"district\": \"Kadıköy\",\n  \"neighborhood\": \"Moda\",\n  \"features\": [\"elevator\", \"parking\", \"security\", \"pool\", \"gym\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/listings",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "listings"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('listingId', response.id);",
+                  "    pm.test('Listing ID saved to environment', function() {",
+                  "        pm.expect(pm.environment.get('listingId')).to.not.be.empty;",
+                  "    });",
+                  "}",
+                  "",
+                  "pm.test('Status code is 201', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Listings",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/listings?page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "listings"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200', function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Response has data and meta', function() {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('data');",
+                  "    pm.expect(response).to.have.property('meta');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Listings with Filters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/listings?listingType=sale&city=İstanbul&minPrice=1000000&maxPrice=5000000&minSqm=100",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "listings"],
+              "query": [
+                { "key": "listingType", "value": "sale" },
+                { "key": "city", "value": "İstanbul" },
+                { "key": "minPrice", "value": "1000000" },
+                { "key": "maxPrice", "value": "5000000" },
+                { "key": "minSqm", "value": "100" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Listing by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/listings/{{listingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "listings", "{{listingId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Listing",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 2750000,\n  \"description\": \"Kadıköy Moda'da eşsiz deniz manzaralı, yeni tadilatlı daire. Fiyat güncellendi.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/listings/{{listingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "listings", "{{listingId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Listing",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/listings/{{listingId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "listings", "{{listingId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Contacts",
+      "item": [
+        {
+          "name": "Create Contact",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ahmet Yılmaz\",\n  \"phone\": \"+905559876543\",\n  \"email\": \"ahmet@example.com\",\n  \"source\": \"whatsapp\",\n  \"contactType\": \"buyer\",\n  \"notes\": \"Kadıköy'de deniz manzaralı daire arıyor\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/contacts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contacts"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('contactId', response.id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Contacts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/contacts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "contacts"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Search Requests",
+      "item": [
+        {
+          "name": "Create Search Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contactId\": \"{{contactId}}\",\n  \"source\": \"whatsapp\",\n  \"rawText\": \"Kadıköy veya Üsküdar'da 3+1 deniz manzaralı daire arıyorum. Bütçem 2-3.5 milyon TL. Asansör ve otopark şart.\",\n  \"listingType\": \"sale\",\n  \"propertyTypes\": [\"apartment\"],\n  \"budgetMin\": 2000000,\n  \"budgetMax\": 3500000,\n  \"currency\": \"TRY\",\n  \"sqmMin\": 100,\n  \"sqmMax\": 180,\n  \"roomCountMin\": \"3+1\",\n  \"roomCountMax\": \"4+1\",\n  \"cities\": [\"İstanbul\"],\n  \"districts\": [\"Kadıköy\", \"Üsküdar\"],\n  \"mustHaveFeatures\": [\"elevator\", \"parking\"],\n  \"niceToHaveFeatures\": [\"pool\", \"gym\", \"security\"],\n  \"criteria\": {\n    \"listing_type\": \"sale\",\n    \"budget\": { \"min\": 2000000, \"max\": 3500000, \"currency\": \"TRY\" },\n    \"location\": { \"cities\": [\"İstanbul\"], \"districts\": [\"Kadıköy\", \"Üsküdar\"] },\n    \"size\": { \"sqm_min\": 100, \"sqm_max\": 180 },\n    \"rooms\": { \"min\": \"3+1\", \"max\": \"4+1\" },\n    \"must_have\": [\"elevator\", \"parking\"],\n    \"nice_to_have\": [\"pool\", \"gym\", \"security\"],\n    \"view\": \"sea\",\n    \"confidence\": 0.92\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/search-requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "search-requests"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('searchRequestId', response.id);",
+                  "    pm.test('Search Request ID saved', function() {",
+                  "        pm.expect(pm.environment.get('searchRequestId')).to.not.be.empty;",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Search Requests",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/search-requests",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "search-requests"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Search Request by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/search-requests/{{searchRequestId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "search-requests", "{{searchRequestId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Run Matching",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/search-requests/{{searchRequestId}}/match",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "search-requests", "{{searchRequestId}}", "match"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201', function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test('Response has matches array', function() {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.property('matches');",
+                  "    pm.expect(response).to.have.property('totalFound');",
+                  "});",
+                  "",
+                  "pm.test('Matches have score breakdown', function() {",
+                  "    const response = pm.response.json();",
+                  "    if (response.matches.length > 0) {",
+                  "        const match = response.matches[0];",
+                  "        pm.expect(match.scoreBreakdown).to.have.property('location_match');",
+                  "        pm.expect(match.scoreBreakdown).to.have.property('price_match');",
+                  "        pm.expect(match.scoreBreakdown).to.have.property('size_match');",
+                  "        pm.expect(match.scoreBreakdown).to.have.property('features_match');",
+                  "        pm.expect(match.scoreBreakdown).to.have.property('room_match');",
+                  "        pm.expect(match.scoreBreakdown).to.have.property('total');",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Activities",
+      "item": [
+        {
+          "name": "Create Activity",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contactId\": \"{{contactId}}\",\n  \"activityType\": \"call\",\n  \"title\": \"Initial Contact Call\",\n  \"description\": \"Called the customer to discuss property requirements\",\n  \"outcome\": \"completed\",\n  \"metadata\": {\n    \"duration\": 15,\n    \"notes\": \"Customer interested in sea view apartments\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/activities",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "activities"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "List Activities",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/activities?contactId={{contactId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "activities"],
+              "query": [
+                { "key": "contactId", "value": "{{contactId}}" }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
