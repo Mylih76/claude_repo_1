@@ -1,0 +1,402 @@
+// schema.prisma
+// MVP Database Schema for Real Estate CRM & Matching Platform
+// Version: 1.0
+// Date: 2025-12-12
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// ENUMS
+// ============================================
+
+enum ListingType {
+  sale
+  rent
+}
+
+enum PropertyType {
+  apartment
+  villa
+  office
+  land
+  shop
+  warehouse
+  building
+}
+
+enum ListingStatus {
+  draft
+  active
+  sold
+  rented
+  inactive
+}
+
+enum HeatingType {
+  central
+  individual
+  floor
+  ac
+  stove
+  none
+}
+
+enum ViewType {
+  sea
+  city
+  nature
+  pool
+  garden
+  street
+  none
+}
+
+enum EntranceType {
+  apartment
+  villa
+  duplex
+  triplex
+}
+
+enum MediaType {
+  image
+  video
+  document
+}
+
+enum ContactSource {
+  manual
+  whatsapp
+  website
+  referral
+}
+
+enum ContactType {
+  buyer
+  seller
+  tenant
+  landlord
+}
+
+enum ContactStatus {
+  new
+  active
+  inactive
+  converted
+  lost
+}
+
+enum SearchRequestSource {
+  manual
+  whatsapp
+  form
+}
+
+enum SearchRequestStatus {
+  active
+  paused
+  fulfilled
+  expired
+}
+
+enum MatchType {
+  auto
+  manual
+}
+
+enum MatchStatus {
+  new
+  sent
+  viewed
+  interested
+  rejected
+}
+
+enum ActivityType {
+  note
+  call
+  meeting
+  showing
+  whatsapp
+  email
+  offer
+}
+
+enum ActivityOutcome {
+  completed
+  no_answer
+  rescheduled
+  cancelled
+}
+
+enum MessageDirection {
+  inbound
+  outbound
+}
+
+enum MessageType {
+  text
+  image
+  document
+  location
+}
+
+enum MessageStatus {
+  pending
+  sent
+  delivered
+  read
+  failed
+}
+
+// ============================================
+// MODELS
+// ============================================
+
+/// Emlakçı kullanıcıları
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  email         String    @unique @db.VarChar(255)
+  passwordHash  String    @map("password_hash") @db.VarChar(255)
+  name          String    @db.VarChar(255)
+  phone         String?   @db.VarChar(20)
+  avatarUrl     String?   @map("avatar_url") @db.VarChar(500)
+  isActive      Boolean   @default(true) @map("is_active")
+  lastLoginAt   DateTime? @map("last_login_at") @db.Timestamptz
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  listings         Listing[]
+  contacts         Contact[]
+  searchRequests   SearchRequest[]
+  activities       Activity[]
+  whatsappMessages WhatsappMessage[]
+
+  @@map("users")
+}
+
+/// Emlak ilanları (portföy)
+model Listing {
+  id            String        @id @default(uuid()) @db.Uuid
+  userId        String        @map("user_id") @db.Uuid
+  listingType   ListingType   @map("listing_type")
+  propertyType  PropertyType  @map("property_type")
+  status        ListingStatus @default(active)
+  title         String        @db.VarChar(255)
+  description   String?       @db.Text
+  price         Decimal       @db.Decimal(15, 2)
+  currency      String        @default("TRY") @db.VarChar(3)
+  grossSqm      Int?          @map("gross_sqm")
+  netSqm        Int?          @map("net_sqm")
+  roomCount     String?       @map("room_count") @db.VarChar(10)
+  buildingAge   Int?          @map("building_age") @db.SmallInt
+  floorNumber   Int?          @map("floor_number") @db.SmallInt
+  totalFloors   Int?          @map("total_floors") @db.SmallInt
+  isFurnished   Boolean?      @map("is_furnished")
+  heatingType   HeatingType?  @map("heating_type")
+  viewType      ViewType?     @map("view_type")
+  entranceType  EntranceType? @map("entrance_type")
+  isInComplex   Boolean?      @default(false) @map("is_in_complex")
+  dues          Decimal?      @db.Decimal(10, 2)
+  city          String        @db.VarChar(100)
+  district      String        @db.VarChar(100)
+  neighborhood  String?       @db.VarChar(100)
+  addressDetail String?       @map("address_detail") @db.Text
+  latitude      Decimal?      @db.Decimal(10, 8)
+  longitude     Decimal?      @db.Decimal(11, 8)
+  features      Json          @default("[]")
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt     DateTime?     @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  user       User           @relation(fields: [userId], references: [id])
+  media      ListingMedia[]
+  matches    Match[]
+  activities Activity[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([listingType])
+  @@index([city, district])
+  @@index([price])
+  @@index([createdAt(sort: Desc)])
+  @@map("listings")
+}
+
+/// İlan medyaları (fotoğraf, video, döküman)
+model ListingMedia {
+  id           String    @id @default(uuid()) @db.Uuid
+  listingId    String    @map("listing_id") @db.Uuid
+  mediaType    MediaType @map("media_type")
+  url          String    @db.VarChar(500)
+  thumbnailUrl String?   @map("thumbnail_url") @db.VarChar(500)
+  fileName     String?   @map("file_name") @db.VarChar(255)
+  fileSize     Int?      @map("file_size")
+  sortOrder    Int       @default(0) @map("sort_order") @db.SmallInt
+  isCover      Boolean   @default(false) @map("is_cover")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId])
+  @@map("listing_media")
+}
+
+/// Müşteri kartları (CRM)
+model Contact {
+  id            String        @id @default(uuid()) @db.Uuid
+  userId        String        @map("user_id") @db.Uuid
+  name          String        @db.VarChar(255)
+  phone         String?       @db.VarChar(20)
+  email         String?       @db.VarChar(255)
+  source        ContactSource @default(manual)
+  contactType   ContactType   @default(buyer) @map("contact_type")
+  status        ContactStatus @default(new)
+  notes         String?       @db.Text
+  lastContactAt DateTime?     @map("last_contact_at") @db.Timestamptz
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt     DateTime?     @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  user             User              @relation(fields: [userId], references: [id])
+  searchRequests   SearchRequest[]
+  activities       Activity[]
+  whatsappMessages WhatsappMessage[]
+
+  @@unique([userId, phone])
+  @@index([userId])
+  @@index([status])
+  @@map("contacts")
+}
+
+/// Müşteri arayış talepleri
+model SearchRequest {
+  id                 String              @id @default(uuid()) @db.Uuid
+  userId             String              @map("user_id") @db.Uuid
+  contactId          String?             @map("contact_id") @db.Uuid
+  source             SearchRequestSource @default(manual)
+  status             SearchRequestStatus @default(active)
+  rawText            String?             @map("raw_text") @db.Text
+  listingType        ListingType?        @map("listing_type")
+  propertyTypes      Json                @default("[]") @map("property_types")
+  budgetMin          Decimal?            @map("budget_min") @db.Decimal(15, 2)
+  budgetMax          Decimal?            @map("budget_max") @db.Decimal(15, 2)
+  currency           String?             @default("TRY") @db.VarChar(3)
+  sqmMin             Int?                @map("sqm_min")
+  sqmMax             Int?                @map("sqm_max")
+  roomCountMin       String?             @map("room_count_min") @db.VarChar(10)
+  roomCountMax       String?             @map("room_count_max") @db.VarChar(10)
+  cities             Json                @default("[]")
+  districts          Json                @default("[]")
+  neighborhoods      Json                @default("[]")
+  mustHaveFeatures   Json                @default("[]") @map("must_have_features")
+  niceToHaveFeatures Json                @default("[]") @map("nice_to_have_features")
+  criteria           Json                @default("{}")
+  notes              String?             @db.Text
+  createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime            @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt          DateTime?           @map("deleted_at") @db.Timestamptz
+
+  // Relations
+  user    User     @relation(fields: [userId], references: [id])
+  contact Contact? @relation(fields: [contactId], references: [id])
+  matches Match[]
+
+  @@index([userId])
+  @@index([contactId])
+  @@index([status])
+  @@map("search_requests")
+}
+
+/// Arayış-İlan eşleştirmeleri
+model Match {
+  id              String      @id @default(uuid()) @db.Uuid
+  searchRequestId String      @map("search_request_id") @db.Uuid
+  listingId       String      @map("listing_id") @db.Uuid
+  matchType       MatchType   @default(auto) @map("match_type")
+  score           Decimal?    @db.Decimal(5, 2)
+  scoreBreakdown  Json        @default("{}") @map("score_breakdown")
+  status          MatchStatus @default(new)
+  notes           String?     @db.Text
+  sentAt          DateTime?   @map("sent_at") @db.Timestamptz
+  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime    @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relations
+  searchRequest SearchRequest @relation(fields: [searchRequestId], references: [id], onDelete: Cascade)
+  listing       Listing       @relation(fields: [listingId], references: [id])
+
+  @@unique([searchRequestId, listingId])
+  @@index([searchRequestId])
+  @@index([listingId])
+  @@index([status])
+  @@map("matches")
+}
+
+/// CRM aktivite timeline
+model Activity {
+  id           String           @id @default(uuid()) @db.Uuid
+  userId       String           @map("user_id") @db.Uuid
+  contactId    String?          @map("contact_id") @db.Uuid
+  listingId    String?          @map("listing_id") @db.Uuid
+  activityType ActivityType     @map("activity_type")
+  title        String?          @db.VarChar(255)
+  description  String?          @db.Text
+  outcome      ActivityOutcome?
+  metadata     Json             @default("{}")
+  scheduledAt  DateTime?        @map("scheduled_at") @db.Timestamptz
+  completedAt  DateTime?        @map("completed_at") @db.Timestamptz
+  createdAt    DateTime         @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  user    User     @relation(fields: [userId], references: [id])
+  contact Contact? @relation(fields: [contactId], references: [id])
+  listing Listing? @relation(fields: [listingId], references: [id])
+
+  @@index([userId])
+  @@index([contactId])
+  @@index([listingId])
+  @@index([activityType])
+  @@index([contactId, createdAt(sort: Desc)])
+  @@map("activities")
+}
+
+/// WhatsApp mesaj logları
+model WhatsappMessage {
+  id                String           @id @default(uuid()) @db.Uuid
+  contactId         String?          @map("contact_id") @db.Uuid
+  userId            String?          @map("user_id") @db.Uuid
+  phoneNumber       String           @map("phone_number") @db.VarChar(20)
+  direction         MessageDirection
+  messageType       MessageType      @default(text) @map("message_type")
+  content           String?          @db.Text
+  mediaUrl          String?          @map("media_url") @db.VarChar(500)
+  status            MessageStatus    @default(pending)
+  errorMessage      String?          @map("error_message") @db.Text
+  externalId        String?          @map("external_id") @db.VarChar(100)
+  relatedListingIds Json             @default("[]") @map("related_listing_ids")
+  sentAt            DateTime?        @map("sent_at") @db.Timestamptz
+  deliveredAt       DateTime?        @map("delivered_at") @db.Timestamptz
+  readAt            DateTime?        @map("read_at") @db.Timestamptz
+  createdAt         DateTime         @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relations
+  contact Contact? @relation(fields: [contactId], references: [id])
+  user    User?    @relation(fields: [userId], references: [id])
+
+  @@index([contactId])
+  @@index([phoneNumber, createdAt(sort: Desc)])
+  @@map("whatsapp_messages")
+}
