@@ -141,6 +141,132 @@ export class ListingsService {
     };
   }
 
+  // View all listings marketplace (all agents can see)
+  async findAllMarketplace(
+    filter: ListingFilterDto,
+  ): Promise<PaginatedResponse<Listing>> {
+    const where: Prisma.ListingWhereInput = {
+      deletedAt: null,
+      status: 'active', // Only show active listings in marketplace
+    };
+
+    // Apply filters (same as findAll but without userId filter)
+    if (filter.listingType) {
+      where.listingType = filter.listingType;
+    }
+
+    if (filter.propertyType) {
+      where.propertyType = filter.propertyType;
+    }
+
+    if (filter.city) {
+      where.city = { contains: filter.city, mode: 'insensitive' };
+    }
+
+    if (filter.district) {
+      where.district = { contains: filter.district, mode: 'insensitive' };
+    }
+
+    if (filter.neighborhood) {
+      where.neighborhood = { contains: filter.neighborhood, mode: 'insensitive' };
+    }
+
+    if (filter.minPrice !== undefined || filter.maxPrice !== undefined) {
+      where.price = {};
+      if (filter.minPrice !== undefined) {
+        where.price.gte = filter.minPrice;
+      }
+      if (filter.maxPrice !== undefined) {
+        where.price.lte = filter.maxPrice;
+      }
+    }
+
+    if (filter.minSqm !== undefined || filter.maxSqm !== undefined) {
+      where.netSqm = {};
+      if (filter.minSqm !== undefined) {
+        where.netSqm.gte = filter.minSqm;
+      }
+      if (filter.maxSqm !== undefined) {
+        where.netSqm.lte = filter.maxSqm;
+      }
+    }
+
+    if (filter.roomCount) {
+      where.roomCount = filter.roomCount;
+    }
+
+    if (filter.furnished !== undefined) {
+      where.isFurnished = filter.furnished;
+    }
+
+    // Get total count
+    const total = await this.prisma.listing.count({ where });
+
+    // Get listings
+    const listings = await this.prisma.listing.findMany({
+      where,
+      skip: filter.skip,
+      take: filter.take,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        media: {
+          where: { isCover: true },
+          take: 1,
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+          },
+        },
+      },
+    });
+
+    return {
+      data: listings,
+      meta: {
+        total,
+        page: filter.page || 1,
+        limit: filter.limit || 20,
+        totalPages: Math.ceil(total / (filter.limit || 20)),
+      },
+    };
+  }
+
+  // View single listing (all agents can see)
+  async findOnePublic(id: string): Promise<Listing> {
+    const listing = await this.prisma.listing.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+      },
+      include: {
+        media: {
+          orderBy: { sortOrder: 'asc' },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!listing) {
+      throw new NotFoundException({
+        errorCode: 'LISTING_NOT_FOUND',
+        message: 'Listing not found',
+      });
+    }
+
+    return listing;
+  }
+
+  // Private method: Get listing with ownership check (for updates/deletes)
   async findOne(userId: string, id: string): Promise<Listing> {
     const listing = await this.prisma.listing.findFirst({
       where: {
@@ -169,7 +295,7 @@ export class ListingsService {
       });
     }
 
-    // Check ownership
+    // Check ownership for modifications
     if (listing.userId !== userId) {
       throw new ForbiddenException({
         errorCode: 'FORBIDDEN',
@@ -243,6 +369,7 @@ export class ListingsService {
   // For matching service - get listings without user check
   async findAllForMatching(filter: {
     listingType?: string;
+    propertyTypes?: string[]; // ✅ Added propertyTypes filter
     cities?: string[];
     districts?: string[];
     neighborhoods?: string[];
@@ -261,6 +388,11 @@ export class ListingsService {
 
     if (filter.listingType) {
       where.listingType = filter.listingType as Prisma.EnumListingTypeFilter;
+    }
+
+    // ✅ Filter by property types (apartment, villa, etc.)
+    if (filter.propertyTypes && filter.propertyTypes.length > 0) {
+      where.propertyType = { in: filter.propertyTypes as any };
     }
 
     if (filter.cities && filter.cities.length > 0) {

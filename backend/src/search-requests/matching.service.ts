@@ -48,6 +48,7 @@ export class MatchingService {
     // Get listings that pass hard filters
     const listings = await this.listingsService.findAllForMatching({
       listingType: searchRequest.listingType || undefined,
+      propertyTypes: (searchRequest.propertyTypes as string[]) || [], // ✅ Added propertyTypes
       cities: (searchRequest.cities as string[]) || [],
       districts: (searchRequest.districts as string[]) || [],
       neighborhoods: (searchRequest.neighborhoods as string[]) || [],

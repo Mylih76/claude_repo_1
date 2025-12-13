@@ -63,11 +63,14 @@ export class ListingsController {
     return this.listingsService.create(user.userId, dto);
   }
 
-  @Get()
-  @ApiOperation({ summary: 'Get all listings with filters and pagination' })
+  @Get('marketplace')
+  @ApiOperation({
+    summary: 'Browse all active listings from all agents',
+    description: 'View marketplace - all agents can see all active listings'
+  })
   @ApiResponse({
     status: 200,
-    description: 'List of listings',
+    description: 'List of all active listings',
     schema: {
       example: {
         data: [
@@ -77,6 +80,11 @@ export class ListingsController {
             price: '2500000',
             city: 'İstanbul',
             district: 'Kadıköy',
+            user: {
+              id: 'agent-uuid',
+              name: 'Agent Name',
+              phone: '+905551234567'
+            }
           },
         ],
         meta: {
@@ -88,6 +96,16 @@ export class ListingsController {
       },
     },
   })
+  async findAllMarketplace(@Query() filter: ListingFilterDto) {
+    return this.listingsService.findAllMarketplace(filter);
+  }
+
+  @Get('my-listings')
+  @ApiOperation({ summary: 'Get my own listings with filters and pagination' })
+  @ApiResponse({
+    status: 200,
+    description: 'List of my listings',
+  })
   async findAll(
     @CurrentUser() user: CurrentUserPayload,
     @Query() filter: ListingFilterDto,
@@ -96,16 +114,15 @@ export class ListingsController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get a listing by ID' })
+  @ApiOperation({
+    summary: 'Get a listing by ID',
+    description: 'All agents can view any listing details'
+  })
   @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
   @ApiResponse({ status: 200, description: 'Listing details' })
   @ApiResponse({ status: 404, description: 'Listing not found' })
-  @ApiResponse({ status: 403, description: 'Forbidden - not your listing' })
-  async findOne(
-    @CurrentUser() user: CurrentUserPayload,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
-    return this.listingsService.findOne(user.userId, id);
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.listingsService.findOnePublic(id);
   }
 
   @Patch(':id')
