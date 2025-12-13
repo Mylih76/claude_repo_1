@@ -269,6 +269,73 @@ Authorization: Bearer {{token}}
 
 ---
 
+### GET /api/listings/marketplace
+
+**Query Params:** (same as GET /api/listings)
+
+**Response (200):**
+```json
+{
+  "data": [
+    {
+      "id": "uuid-here",
+      "title": "3+1 Deniz Manzaralı Daire",
+      "price": "2500000",
+      "city": "İstanbul",
+      "district": "Kadıköy",
+      "user": {
+        "id": "other-agent-uuid",
+        "name": "Other Agent",
+        "phone": "+905551234567"
+      }
+    }
+  ],
+  "meta": {
+    "total": 50,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 3
+  }
+}
+```
+
+**Test Date:** _______________
+**Status:** [ ] Passed / [ ] Failed
+**Notes:** _______________
+
+---
+
+### GET /api/listings/my-listings
+
+**Query Params:** (same as GET /api/listings)
+
+**Response (200):**
+```json
+{
+  "data": [
+    {
+      "id": "uuid-here",
+      "title": "My Listing",
+      "price": "2500000"
+    }
+  ],
+  "meta": {
+    "total": 10,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 1
+  }
+}
+```
+
+**Test Date:** _______________
+**Status:** [ ] Passed / [ ] Failed
+**Notes:** _______________
+
+---
+
+---
+
 ## Search Requests Endpoints
 
 ### POST /api/search-requests
@@ -301,6 +368,139 @@ Authorization: Bearer {{token}}
   "createdAt": "2025-01-01T00:00:00.000Z"
 }
 
+```
+
+**Test Date:** _______________
+**Status:** [ ] Passed / [ ] Failed
+**Notes:** _______________
+
+---
+
+### GET /api/search-requests
+
+**Query Params:**
+- `page=1`
+- `limit=20`
+- `status=active` (optional: active, paused, fulfilled, expired)
+- `listingType=sale` (optional)
+- `contactId=uuid` (optional)
+
+**Response (200):**
+```json
+{
+  "data": [
+    {
+      "id": "uuid-here",
+      "rawText": "...",
+      "status": "active",
+      "createdAt": "2025-01-01T00:00:00.000Z",
+      "_count": {
+        "matches": 5
+      }
+    }
+  ],
+  "meta": {
+    "total": 10,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 1
+  }
+}
+```
+
+**Test Date:** _______________
+**Status:** [ ] Passed / [ ] Failed
+**Notes:** _______________
+
+---
+
+### GET /api/search-requests/:id
+
+**Response (200):**
+```json
+{
+  "id": "uuid-here",
+  "userId": "user-uuid",
+  "rawText": "...",
+  "criteria": {},
+  "status": "active",
+  "createdAt": "2025-01-01T00:00:00.000Z",
+  "matches": [
+    {
+      "id": "match-uuid",
+      "score": "89.00",
+      "listing": {
+        "id": "listing-uuid",
+        "title": "3+1 Daire"
+      }
+    }
+  ]
+}
+```
+
+**Test Date:** _______________
+**Status:** [ ] Passed / [ ] Failed
+**Notes:** _______________
+
+---
+
+### PATCH /api/search-requests/:id
+
+**Request:**
+```json
+{
+  "budgetMax": 4000000,
+  "districts": ["Kadıköy", "Beşiktaş"]
+}
+```
+
+**Response (200):**
+```json
+{
+  "id": "uuid-here",
+  "budgetMax": 4000000,
+  "districts": ["Kadıköy", "Beşiktaş"],
+  "updatedAt": "2025-01-02T00:00:00.000Z"
+}
+```
+
+**Test Date:** _______________
+**Status:** [ ] Passed / [ ] Failed
+**Notes:** _______________
+
+---
+
+### PATCH /api/search-requests/:id/status
+
+**Request:**
+```json
+{
+  "status": "paused"
+}
+```
+
+**Response (200):**
+```json
+{
+  "id": "uuid-here",
+  "status": "paused",
+  "updatedAt": "2025-01-02T00:00:00.000Z"
+}
+```
+
+**Test Date:** _______________
+**Status:** [ ] Passed / [ ] Failed
+**Notes:** _______________
+
+---
+
+### DELETE /api/search-requests/:id
+
+**Response (200):**
+```json
+{
+  "message": "Search request deleted successfully"
+}
 ```
 
 **Test Date:** _______________
@@ -388,10 +588,15 @@ Tüm hata durumlarında standart format:
 | GET /auth/me | | | |
 | POST /listings | | | |
 | GET /listings | | | |
+| **GET /listings/marketplace** | | | |
+| **GET /listings/my-listings** | | | |
 | GET /listings/:id | | | |
 | PATCH /listings/:id | | | |
 | DELETE /listings/:id | | | |
 | POST /search-requests | | | |
 | GET /search-requests | | | |
 | GET /search-requests/:id | | | |
+| **PATCH /search-requests/:id** | | | |
+| **PATCH /search-requests/:id/status** | | | |
+| **DELETE /search-requests/:id** | | | |
 | POST /search-requests/:id/match | | | |
