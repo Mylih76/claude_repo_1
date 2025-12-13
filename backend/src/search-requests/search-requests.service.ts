@@ -175,30 +175,32 @@ export class SearchRequestsService {
     // Check ownership
     await this.findOne(userId, id);
 
+    const updateData: any = {};
+
+    if (dto.contactId !== undefined) updateData.contactId = dto.contactId;
+    if (dto.source) updateData.source = dto.source;
+    if (dto.status) updateData.status = dto.status;
+    if (dto.rawText !== undefined) updateData.rawText = dto.rawText;
+    if (dto.listingType !== undefined) updateData.listingType = dto.listingType;
+    if (dto.propertyTypes !== undefined) updateData.propertyTypes = dto.propertyTypes;
+    if (dto.budgetMin !== undefined) updateData.budgetMin = dto.budgetMin;
+    if (dto.budgetMax !== undefined) updateData.budgetMax = dto.budgetMax;
+    if (dto.currency) updateData.currency = dto.currency;
+    if (dto.sqmMin !== undefined) updateData.sqmMin = dto.sqmMin;
+    if (dto.sqmMax !== undefined) updateData.sqmMax = dto.sqmMax;
+    if (dto.roomCountMin !== undefined) updateData.roomCountMin = dto.roomCountMin;
+    if (dto.roomCountMax !== undefined) updateData.roomCountMax = dto.roomCountMax;
+    if (dto.cities !== undefined) updateData.cities = dto.cities;
+    if (dto.districts !== undefined) updateData.districts = dto.districts;
+    if (dto.neighborhoods !== undefined) updateData.neighborhoods = dto.neighborhoods;
+    if (dto.mustHaveFeatures !== undefined) updateData.mustHaveFeatures = dto.mustHaveFeatures;
+    if (dto.niceToHaveFeatures !== undefined) updateData.niceToHaveFeatures = dto.niceToHaveFeatures;
+    if (dto.criteria !== undefined) updateData.criteria = dto.criteria as Prisma.InputJsonValue;
+    if (dto.notes !== undefined) updateData.notes = dto.notes;
+
     return this.prisma.searchRequest.update({
       where: { id },
-      data: {
-        ...(dto.contactId !== undefined && { contactId: dto.contactId }),
-        ...(dto.source && { source: dto.source }),
-        ...(dto.status && { status: dto.status }),
-        ...(dto.rawText !== undefined && { rawText: dto.rawText }),
-        ...(dto.listingType !== undefined && { listingType: dto.listingType }),
-        ...(dto.propertyTypes !== undefined && { propertyTypes: dto.propertyTypes }),
-        ...(dto.budgetMin !== undefined && { budgetMin: dto.budgetMin }),
-        ...(dto.budgetMax !== undefined && { budgetMax: dto.budgetMax }),
-        ...(dto.currency && { currency: dto.currency }),
-        ...(dto.sqmMin !== undefined && { sqmMin: dto.sqmMin }),
-        ...(dto.sqmMax !== undefined && { sqmMax: dto.sqmMax }),
-        ...(dto.roomCountMin !== undefined && { roomCountMin: dto.roomCountMin }),
-        ...(dto.roomCountMax !== undefined && { roomCountMax: dto.roomCountMax }),
-        ...(dto.cities !== undefined && { cities: dto.cities }),
-        ...(dto.districts !== undefined && { districts: dto.districts }),
-        ...(dto.neighborhoods !== undefined && { neighborhoods: dto.neighborhoods }),
-        ...(dto.mustHaveFeatures !== undefined && { mustHaveFeatures: dto.mustHaveFeatures }),
-        ...(dto.niceToHaveFeatures !== undefined && { niceToHaveFeatures: dto.niceToHaveFeatures }),
-        ...(dto.criteria !== undefined && { criteria: dto.criteria }),
-        ...(dto.notes !== undefined && { notes: dto.notes }),
-      },
+      data: updateData,
       include: {
         contact: {
           select: {
