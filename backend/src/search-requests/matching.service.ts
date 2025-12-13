@@ -11,6 +11,7 @@ interface ScoreBreakdown {
   features_match: number;
   room_match: number;
   total: number;
+  [key: string]: number; // Add index signature for Prisma JSON compatibility
 }
 
 interface MatchResult {
