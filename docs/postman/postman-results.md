@@ -42,10 +42,8 @@ Bu dosya API endpoint'lerinin test sonuçlarını kaydetmek için kullanılır.
 
 **Request:**
 ```json
-{
-  "email": "agent@example.com",
-  "password": "SecurePass123!"
-}
+{ "email": "agent@example.com", "password": "SecurePass123!" }
+
 ```
 
 **Response (200):**
@@ -155,8 +153,13 @@ Authorization: Bearer {{token}}
 - `limit=20`
 - `listingType=sale` (optional)
 - `city=İstanbul` (optional)
+- `district=Kadıköy` (optional)
+- `neighborhood=Moda` (optional)
 - `minPrice=1000000` (optional)
 - `maxPrice=5000000` (optional)
+
+**Example:**
+- `?page=1&limit=20&city=Muğla&district=Bodrum&neighborhood=Yalıkavak&listingType=sale`
 
 **Response (200):**
 ```json
@@ -177,6 +180,7 @@ Authorization: Bearer {{token}}
     "totalPages": 3
   }
 }
+
 ```
 
 **Test Date:** _______________
@@ -263,6 +267,8 @@ Authorization: Bearer {{token}}
 
 ---
 
+---
+
 ## Search Requests Endpoints
 
 ### POST /api/search-requests
@@ -270,18 +276,19 @@ Authorization: Bearer {{token}}
 **Request:**
 ```json
 {
-  "rawText": "Kadıköy veya Üsküdar'da 3+1 deniz manzaralı daire arıyorum.",
-  "listingType": "sale",
-  "budgetMin": 2000000,
-  "budgetMax": 3500000,
-  "districts": ["Kadıköy", "Üsküdar"],
-  "mustHaveFeatures": ["elevator", "parking"],
+  "rawText": "Yalıkavak'ta bahçeli deniz manzaralı 3+1 satılık villa, bütçe 15 milyon.",
   "criteria": {
-    "listing_type": "sale",
-    "budget": { "min": 2000000, "max": 3500000 },
-    "confidence": 0.92
+    "city": "Muğla",
+    "district": "Bodrum",
+    "neighborhood": "Yalıkavak",
+    "listingType": "sale",
+    "maxPrice": 15000000,
+    "roomCount": "3+1",
+    "viewType": "sea",
+    "features": ["garden"]
   }
 }
+
 ```
 
 **Response (201):**
@@ -289,14 +296,11 @@ Authorization: Bearer {{token}}
 {
   "id": "uuid-here",
   "userId": "user-uuid",
-  "rawText": "Kadıköy veya Üsküdar'da 3+1 deniz manzaralı daire arıyorum.",
-  "listingType": "sale",
-  "budgetMin": "2000000",
-  "budgetMax": "3500000",
-  "districts": ["Kadıköy", "Üsküdar"],
-  "status": "active",
+  "rawText": "…",
+  "criteria": { "city": "Muğla", "district": "Bodrum", "neighborhood": "Yalıkavak", "listingType": "sale" },
   "createdAt": "2025-01-01T00:00:00.000Z"
 }
+
 ```
 
 **Test Date:** _______________
