@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16
+    container_name: emlak_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: emlak
+    ports:
+      - "5432:5432"
+    volumes:
+      - emlak_pgdata:/var/lib/postgresql/data
+
+volumes:
+  emlak_pgdata:

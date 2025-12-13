@@ -17,7 +17,12 @@
     "lint": "eslint \"src/**/*.ts\"",
     "format": "prettier --write \"src/**/*.ts\""
   },
-  "keywords": ["nestjs", "prisma", "real-estate", "crm"],
+  "keywords": [
+    "nestjs",
+    "prisma",
+    "real-estate",
+    "crm"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -28,7 +33,7 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.1.9",
     "@nestjs/swagger": "^11.2.3",
-    "@prisma/client": "^7.1.0",
+    "@prisma/client": "^6.19.1",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",
@@ -48,7 +53,7 @@
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",
     "@types/uuid": "^10.0.0",
-    "prisma": "^7.1.0",
+    "prisma": "^6.19.1",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
     "tsconfig-paths": "^4.2.0",
