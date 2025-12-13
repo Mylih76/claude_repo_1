@@ -45,7 +45,7 @@ export class ActivitiesService {
         title: dto.title,
         description: dto.description,
         outcome: dto.outcome,
-        metadata: dto.metadata || {},
+        metadata: (dto.metadata ?? {}) as Prisma.InputJsonValue,
         scheduledAt: dto.scheduledAt,
         completedAt: dto.completedAt,
       },

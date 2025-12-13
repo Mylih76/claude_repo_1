@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ListingsService } from '../listings/listings.service';
 import { SearchRequestsService } from './search-requests.service';
-import { Listing, SearchRequest, Match } from '@prisma/client';
+import { Listing, SearchRequest, Match, Prisma } from '@prisma/client';
 
 interface ScoreBreakdown {
   location_match: number;
@@ -87,7 +87,7 @@ export class MatchingService {
             where: { id: existingMatch.id },
             data: {
               score: scoreBreakdown.total,
-              scoreBreakdown: scoreBreakdown as unknown as Record<string, unknown>,
+              scoreBreakdown: scoreBreakdown as Prisma.InputJsonValue,
               matchType: 'auto',
             },
           });
@@ -99,7 +99,7 @@ export class MatchingService {
               listingId: listing.id,
               matchType: 'auto',
               score: scoreBreakdown.total,
-              scoreBreakdown: scoreBreakdown as unknown as Record<string, unknown>,
+              scoreBreakdown: scoreBreakdown as Prisma.InputJsonValue,
               status: 'new',
             },
           });

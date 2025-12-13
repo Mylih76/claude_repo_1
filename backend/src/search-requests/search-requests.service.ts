@@ -38,7 +38,7 @@ export class SearchRequestsService {
         neighborhoods: dto.neighborhoods || [],
         mustHaveFeatures: dto.mustHaveFeatures || [],
         niceToHaveFeatures: dto.niceToHaveFeatures || [],
-        criteria: dto.criteria || {},
+        criteria: (dto.criteria ?? {}) as Prisma.InputJsonValue,
         notes: dto.notes,
       },
       include: {

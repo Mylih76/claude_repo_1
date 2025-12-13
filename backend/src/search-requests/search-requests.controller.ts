@@ -135,7 +135,7 @@ export class SearchRequestsController {
   async runMatching(
     @CurrentUser() user: CurrentUserPayload,
     @Param('id', ParseUUIDPipe) id: string,
-  ) {
+  ): Promise<any> {
     return this.matchingService.runMatching(user.userId, id);
   }
 }
