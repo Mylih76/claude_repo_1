@@ -2,6 +2,8 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
+  Delete,
   Body,
   Param,
   Query,
@@ -18,6 +20,8 @@ import {
 import { SearchRequestsService } from './search-requests.service';
 import { MatchingService } from './matching.service';
 import { CreateSearchRequestDto } from './dto/create-search-request.dto';
+import { UpdateSearchRequestDto } from './dto/update-search-request.dto';
+import { UpdateStatusDto } from './dto/update-status.dto';
 import { SearchRequestFilterDto } from './dto/search-request-filter.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser, CurrentUserPayload } from '../common/decorators/current-user.decorator';
@@ -84,6 +88,64 @@ export class SearchRequestsController {
     @Param('id', ParseUUIDPipe) id: string,
   ) {
     return this.searchRequestsService.findOne(user.userId, id);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update search request criteria' })
+  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiResponse({ status: 200, description: 'Search request updated successfully' })
+  @ApiResponse({ status: 404, description: 'Search request not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden - not your search request' })
+  async update(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateSearchRequestDto,
+  ) {
+    return this.searchRequestsService.update(user.userId, id, dto);
+  }
+
+  @Patch(':id/status')
+  @ApiOperation({ summary: 'Update search request status' })
+  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiResponse({
+    status: 200,
+    description: 'Status updated successfully',
+    schema: {
+      example: {
+        id: '123e4567-e89b-12d3-a456-426614174000',
+        status: 'paused',
+        updatedAt: '2025-12-13T12:00:00.000Z'
+      }
+    }
+  })
+  @ApiResponse({ status: 404, description: 'Search request not found' })
+  async updateStatus(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: UpdateStatusDto,
+  ) {
+    return this.searchRequestsService.updateStatus(user.userId, id, dto.status);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Delete search request (soft delete)' })
+  @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
+  @ApiResponse({
+    status: 200,
+    description: 'Search request deleted successfully',
+    schema: {
+      example: {
+        message: 'Search request deleted successfully'
+      }
+    }
+  })
+  @ApiResponse({ status: 404, description: 'Search request not found' })
+  @ApiResponse({ status: 403, description: 'Forbidden - not your search request' })
+  async remove(
+    @CurrentUser() user: CurrentUserPayload,
+    @Param('id', ParseUUIDPipe) id: string,
+  ) {
+    return this.searchRequestsService.remove(user.userId, id);
   }
 
   @Post(':id/match')

@@ -166,4 +166,76 @@ export class SearchRequestsService {
       },
     });
   }
+
+  async update(
+    userId: string,
+    id: string,
+    dto: Partial<CreateSearchRequestDto>,
+  ): Promise<SearchRequest> {
+    // Check ownership
+    await this.findOne(userId, id);
+
+    return this.prisma.searchRequest.update({
+      where: { id },
+      data: {
+        ...(dto.contactId !== undefined && { contactId: dto.contactId }),
+        ...(dto.source && { source: dto.source }),
+        ...(dto.status && { status: dto.status }),
+        ...(dto.rawText !== undefined && { rawText: dto.rawText }),
+        ...(dto.listingType !== undefined && { listingType: dto.listingType }),
+        ...(dto.propertyTypes !== undefined && { propertyTypes: dto.propertyTypes }),
+        ...(dto.budgetMin !== undefined && { budgetMin: dto.budgetMin }),
+        ...(dto.budgetMax !== undefined && { budgetMax: dto.budgetMax }),
+        ...(dto.currency && { currency: dto.currency }),
+        ...(dto.sqmMin !== undefined && { sqmMin: dto.sqmMin }),
+        ...(dto.sqmMax !== undefined && { sqmMax: dto.sqmMax }),
+        ...(dto.roomCountMin !== undefined && { roomCountMin: dto.roomCountMin }),
+        ...(dto.roomCountMax !== undefined && { roomCountMax: dto.roomCountMax }),
+        ...(dto.cities !== undefined && { cities: dto.cities }),
+        ...(dto.districts !== undefined && { districts: dto.districts }),
+        ...(dto.neighborhoods !== undefined && { neighborhoods: dto.neighborhoods }),
+        ...(dto.mustHaveFeatures !== undefined && { mustHaveFeatures: dto.mustHaveFeatures }),
+        ...(dto.niceToHaveFeatures !== undefined && { niceToHaveFeatures: dto.niceToHaveFeatures }),
+        ...(dto.criteria !== undefined && { criteria: dto.criteria }),
+        ...(dto.notes !== undefined && { notes: dto.notes }),
+      },
+      include: {
+        contact: {
+          select: {
+            id: true,
+            name: true,
+            phone: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
+
+  async updateStatus(
+    userId: string,
+    id: string,
+    status: string,
+  ): Promise<SearchRequest> {
+    // Check ownership
+    await this.findOne(userId, id);
+
+    return this.prisma.searchRequest.update({
+      where: { id },
+      data: { status: status as any },
+    });
+  }
+
+  async remove(userId: string, id: string): Promise<{ message: string }> {
+    // Check ownership
+    await this.findOne(userId, id);
+
+    // Soft delete
+    await this.prisma.searchRequest.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+
+    return { message: 'Search request deleted successfully' };
+  }
 }
