@@ -2,6 +2,9 @@ import type { ApiError } from './types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+// Debug log - remove after fixing
+console.log('[API Client] NEXT_PUBLIC_API_URL:', API_URL);
+
 if (!API_URL) {
   console.warn('NEXT_PUBLIC_API_URL environment variable is not set');
 }
@@ -94,6 +97,9 @@ async function request<TResponse, TBody = unknown>(
       requestHeaders['Authorization'] = `Bearer ${token}`;
     }
   }
+
+  // Debug log - remove after fixing
+  console.log('[API Client] Request:', method, url);
 
   // Make request
   const response = await fetch(url, {
