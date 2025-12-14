@@ -1,13 +1,10 @@
 import type { ApiError } from './types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+// Fallback to localhost:3000 if env var not set
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
 // Debug log - remove after fixing
 console.log('[API Client] NEXT_PUBLIC_API_URL:', API_URL);
-
-if (!API_URL) {
-  console.warn('NEXT_PUBLIC_API_URL environment variable is not set');
-}
 
 // ============================================
 // Token Storage
