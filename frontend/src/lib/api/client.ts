@@ -1,10 +1,23 @@
 import type { ApiError } from './types';
 
-// Fallback to localhost:3000 if env var not set
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+// Get API URL - must include /api prefix to match backend
+function getApiUrl(): string {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
 
-// Debug log - remove after fixing
-console.log('[API Client] NEXT_PUBLIC_API_URL:', API_URL);
+  // Debug: log what we got from env
+  console.log('[API Client] Raw env value:', envUrl, 'Type:', typeof envUrl);
+
+  if (envUrl && envUrl !== 'undefined') {
+    // Ensure /api suffix exists
+    return envUrl.endsWith('/api') ? envUrl : `${envUrl}/api`;
+  }
+
+  // Fallback for development
+  return 'http://localhost:3000/api';
+}
+
+const API_URL = getApiUrl();
+console.log('[API Client] Final API_URL:', API_URL);
 
 // ============================================
 // Token Storage
@@ -66,8 +79,22 @@ async function request<TResponse, TBody = unknown>(
 ): Promise<TResponse> {
   const { method = 'GET', body, params, headers = {}, skipAuth = false } = options;
 
+  // Defensive guard: check endpoint is valid
+  if (!endpoint || endpoint.includes('undefined')) {
+    throw new Error(`[API Client] Invalid endpoint: ${endpoint}`);
+  }
+
   // Build URL with query params
   let url = `${API_URL}${endpoint}`;
+
+  // Defensive guard: ensure URL is absolute and valid
+  if (!url.startsWith('http://') && !url.startsWith('https://')) {
+    throw new Error(`[API Client] Invalid URL (not absolute): ${url}. API_URL=${API_URL}, endpoint=${endpoint}`);
+  }
+  if (url.includes('undefined')) {
+    throw new Error(`[API Client] URL contains undefined: ${url}. API_URL=${API_URL}, endpoint=${endpoint}`);
+  }
+
   if (params) {
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
