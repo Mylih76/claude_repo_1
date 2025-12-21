@@ -64,10 +64,10 @@ export class ListingsController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all listings with filters and pagination' })
+  @ApiOperation({ summary: 'Get all active listings with filters and pagination' })
   @ApiResponse({
     status: 200,
-    description: 'List of listings',
+    description: 'List of all active listings (marketplace view)',
     schema: {
       example: {
         data: [
@@ -88,11 +88,8 @@ export class ListingsController {
       },
     },
   })
-  async findAll(
-    @CurrentUser() user: CurrentUserPayload,
-    @Query() filter: ListingFilterDto,
-  ) {
-    return this.listingsService.findAll(user.userId, filter);
+  async findAll(@Query() filter: ListingFilterDto) {
+    return this.listingsService.findAll(filter);
   }
 
   @Get(':id')
@@ -100,12 +97,8 @@ export class ListingsController {
   @ApiParam({ name: 'id', type: 'string', format: 'uuid' })
   @ApiResponse({ status: 200, description: 'Listing details' })
   @ApiResponse({ status: 404, description: 'Listing not found' })
-  @ApiResponse({ status: 403, description: 'Forbidden - not your listing' })
-  async findOne(
-    @CurrentUser() user: CurrentUserPayload,
-    @Param('id', ParseUUIDPipe) id: string,
-  ) {
-    return this.listingsService.findOne(user.userId, id);
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.listingsService.findOne(id);
   }
 
   @Patch(':id')

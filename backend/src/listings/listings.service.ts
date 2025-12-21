@@ -52,12 +52,11 @@ export class ListingsService {
   }
 
   async findAll(
-    userId: string,
     filter: ListingFilterDto,
   ): Promise<PaginatedResponse<Listing>> {
     const where: Prisma.ListingWhereInput = {
-      userId,
       deletedAt: null,
+      status: 'active',
     };
 
     // Apply filters
@@ -141,7 +140,7 @@ export class ListingsService {
     };
   }
 
-  async findOne(userId: string, id: string): Promise<Listing> {
+  async findOne(id: string): Promise<Listing> {
     const listing = await this.prisma.listing.findFirst({
       where: {
         id,
@@ -169,11 +168,17 @@ export class ListingsService {
       });
     }
 
-    // Check ownership
+    return listing;
+  }
+
+  // Private method to check ownership for write operations
+  private async checkOwnership(userId: string, id: string): Promise<Listing> {
+    const listing = await this.findOne(id);
+
     if (listing.userId !== userId) {
       throw new ForbiddenException({
         errorCode: 'FORBIDDEN',
-        message: 'You do not have access to this listing',
+        message: 'You do not have permission to modify this listing',
       });
     }
 
@@ -186,7 +191,7 @@ export class ListingsService {
     dto: UpdateListingDto,
   ): Promise<Listing> {
     // Check existence and ownership
-    await this.findOne(userId, id);
+    await this.checkOwnership(userId, id);
 
     return this.prisma.listing.update({
       where: { id },
@@ -226,7 +231,7 @@ export class ListingsService {
 
   async remove(userId: string, id: string): Promise<{ message: string }> {
     // Check existence and ownership
-    await this.findOne(userId, id);
+    await this.checkOwnership(userId, id);
 
     // Soft delete
     await this.prisma.listing.update({
