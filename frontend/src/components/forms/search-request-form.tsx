@@ -14,8 +14,6 @@ import {
   LISTING_TYPES,
   LISTING_TYPE_LABELS,
   ROOM_COUNTS,
-  VIEW_TYPES,
-  VIEW_TYPE_LABELS,
   LISTING_FEATURES,
   LISTING_FEATURE_LABELS,
 } from '@/lib/utils/constants';
@@ -30,7 +28,7 @@ export function SearchRequestForm({ initialData, onSubmit, isLoading = false }: 
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>(
-    initialData?.criteria.features || []
+    initialData?.mustHaveFeatures || []
   );
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -39,25 +37,35 @@ export function SearchRequestForm({ initialData, onSubmit, isLoading = false }: 
 
     const formData = new FormData(event.currentTarget);
 
+    // Get form values
+    const rawText = (formData.get('rawText') as string) || undefined;
+    const listingType = (formData.get('listingType') as 'sale' | 'rent') || undefined;
+    const city = (formData.get('city') as string)?.trim() || undefined;
+    const district = (formData.get('district') as string)?.trim() || undefined;
+    const neighborhood = (formData.get('neighborhood') as string)?.trim() || undefined;
+    const minPrice = formData.get('minPrice') ? Number(formData.get('minPrice')) : undefined;
+    const maxPrice = formData.get('maxPrice') ? Number(formData.get('maxPrice')) : undefined;
+    const roomCount = (formData.get('roomCount') as string) || undefined;
+
+    // Build request matching backend DTO structure
     const data: CreateSearchRequestRequest = {
-      rawText: (formData.get('rawText') as string) || undefined,
-      criteria: {
-        listingType: (formData.get('listingType') as 'sale' | 'rent') || undefined,
-        city: (formData.get('city') as string) || undefined,
-        district: (formData.get('district') as string) || undefined,
-        neighborhood: (formData.get('neighborhood') as string) || undefined,
-        minPrice: formData.get('minPrice') ? Number(formData.get('minPrice')) : undefined,
-        maxPrice: formData.get('maxPrice') ? Number(formData.get('maxPrice')) : undefined,
-        roomCount: (formData.get('roomCount') as string) || undefined,
-        viewType: (formData.get('viewType') as 'sea' | 'city' | 'nature') || undefined,
-        features: selectedFeatures.length > 0 ? selectedFeatures : undefined,
-      },
+      rawText,
+      listingType,
+      // Convert single values to arrays for backend
+      cities: city ? [city] : undefined,
+      districts: district ? [district] : undefined,
+      neighborhoods: neighborhood ? [neighborhood] : undefined,
+      budgetMin: minPrice,
+      budgetMax: maxPrice,
+      roomCountMin: roomCount,
+      roomCountMax: roomCount,
+      mustHaveFeatures: selectedFeatures.length > 0 ? selectedFeatures : undefined,
     };
 
     // Basic validation
-    const hasCriteria = Object.values(data.criteria).some(
-      (v) => v !== undefined && (Array.isArray(v) ? v.length > 0 : true)
-    );
+    const hasCriteria = data.listingType || data.cities?.length || data.districts?.length ||
+      data.budgetMin || data.budgetMax || data.roomCountMin || data.mustHaveFeatures?.length;
+
     if (!data.rawText && !hasCriteria) {
       setError('Please provide either a description or some search criteria');
       return;
@@ -124,7 +132,7 @@ export function SearchRequestForm({ initialData, onSubmit, isLoading = false }: 
             <Select
               name="listingType"
               label="Type"
-              defaultValue={initialData?.criteria.listingType || ''}
+              defaultValue={initialData?.listingType || ''}
               disabled={isLoading}
               placeholder="Select type"
               options={[
@@ -139,7 +147,7 @@ export function SearchRequestForm({ initialData, onSubmit, isLoading = false }: 
             <Select
               name="roomCount"
               label="Rooms"
-              defaultValue={initialData?.criteria.roomCount || ''}
+              defaultValue={initialData?.roomCountMin || ''}
               disabled={isLoading}
               placeholder="Select rooms"
               options={[
@@ -154,7 +162,7 @@ export function SearchRequestForm({ initialData, onSubmit, isLoading = false }: 
               name="city"
               label="City"
               placeholder="e.g., Istanbul"
-              defaultValue={initialData?.criteria.city || ''}
+              defaultValue={initialData?.cities?.[0] || ''}
               disabled={isLoading}
             />
 
@@ -162,7 +170,7 @@ export function SearchRequestForm({ initialData, onSubmit, isLoading = false }: 
               name="district"
               label="District"
               placeholder="e.g., Kadikoy"
-              defaultValue={initialData?.criteria.district || ''}
+              defaultValue={initialData?.districts?.[0] || ''}
               disabled={isLoading}
             />
 
@@ -170,7 +178,7 @@ export function SearchRequestForm({ initialData, onSubmit, isLoading = false }: 
               name="neighborhood"
               label="Neighborhood"
               placeholder="e.g., Moda"
-              defaultValue={initialData?.criteria.neighborhood || ''}
+              defaultValue={initialData?.neighborhoods?.[0] || ''}
               disabled={isLoading}
             />
           </div>
@@ -181,7 +189,7 @@ export function SearchRequestForm({ initialData, onSubmit, isLoading = false }: 
               type="number"
               label="Min Budget"
               placeholder="1000000"
-              defaultValue={initialData?.criteria.minPrice || ''}
+              defaultValue={initialData?.budgetMin || ''}
               disabled={isLoading}
             />
 
@@ -190,25 +198,10 @@ export function SearchRequestForm({ initialData, onSubmit, isLoading = false }: 
               type="number"
               label="Max Budget"
               placeholder="5000000"
-              defaultValue={initialData?.criteria.maxPrice || ''}
+              defaultValue={initialData?.budgetMax || ''}
               disabled={isLoading}
             />
           </div>
-
-          <Select
-            name="viewType"
-            label="Preferred View"
-            defaultValue={initialData?.criteria.viewType || ''}
-            disabled={isLoading}
-            placeholder="Select view"
-            options={[
-              { value: '', label: 'Any' },
-              ...VIEW_TYPES.map((v) => ({
-                value: v,
-                label: VIEW_TYPE_LABELS[v],
-              })),
-            ]}
-          />
         </CardContent>
       </Card>
 
