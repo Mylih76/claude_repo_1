@@ -187,9 +187,9 @@ export default function DashboardPage() {
                       {request.rawText || 'Search criteria'}
                     </p>
                     <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
-                      {request.criteria.city && <span>{request.criteria.city}</span>}
-                      {request.criteria.listingType && (
-                        <span className="capitalize">{request.criteria.listingType}</span>
+                      {(request.cities?.length ?? 0) > 0 && <span>{request.cities[0]}</span>}
+                      {request.listingType && (
+                        <span className="capitalize">{request.listingType}</span>
                       )}
                       <span>{formatRelativeTime(request.createdAt)}</span>
                     </div>

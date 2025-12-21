@@ -14,10 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { formatPrice, formatDate } from '@/lib/utils/format';
 import {
   LISTING_TYPE_LABELS,
-  VIEW_TYPE_LABELS,
   LISTING_FEATURE_LABELS,
   type ListingType,
-  type ViewType,
   type ListingFeature,
 } from '@/lib/utils/constants';
 
@@ -67,8 +65,6 @@ export default function SearchRequestDetailPage() {
       </div>
     );
   }
-
-  const { criteria } = searchRequest;
 
   return (
     <div>
@@ -126,63 +122,59 @@ export default function SearchRequestDetailPage() {
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {criteria.listingType && (
+              {searchRequest.listingType && (
                 <div>
                   <p className="text-sm text-muted-foreground">Type</p>
                   <p className="font-medium">
-                    {LISTING_TYPE_LABELS[criteria.listingType as ListingType]}
+                    {LISTING_TYPE_LABELS[searchRequest.listingType as ListingType]}
                   </p>
                 </div>
               )}
-              {criteria.city && (
+              {searchRequest.cities?.length > 0 && (
                 <div>
                   <p className="text-sm text-muted-foreground">City</p>
-                  <p className="font-medium">{criteria.city}</p>
+                  <p className="font-medium">{searchRequest.cities.join(', ')}</p>
                 </div>
               )}
-              {criteria.district && (
+              {searchRequest.districts?.length > 0 && (
                 <div>
                   <p className="text-sm text-muted-foreground">District</p>
-                  <p className="font-medium">{criteria.district}</p>
+                  <p className="font-medium">{searchRequest.districts.join(', ')}</p>
                 </div>
               )}
-              {criteria.neighborhood && (
+              {searchRequest.neighborhoods?.length > 0 && (
                 <div>
                   <p className="text-sm text-muted-foreground">Neighborhood</p>
-                  <p className="font-medium">{criteria.neighborhood}</p>
+                  <p className="font-medium">{searchRequest.neighborhoods.join(', ')}</p>
                 </div>
               )}
-              {(criteria.minPrice || criteria.maxPrice) && (
+              {(searchRequest.budgetMin || searchRequest.budgetMax) && (
                 <div>
                   <p className="text-sm text-muted-foreground">Budget</p>
                   <p className="font-medium">
-                    {criteria.minPrice && formatPrice(criteria.minPrice)}
-                    {criteria.minPrice && criteria.maxPrice && ' - '}
-                    {criteria.maxPrice && formatPrice(criteria.maxPrice)}
+                    {searchRequest.budgetMin && formatPrice(Number(searchRequest.budgetMin))}
+                    {searchRequest.budgetMin && searchRequest.budgetMax && ' - '}
+                    {searchRequest.budgetMax && formatPrice(Number(searchRequest.budgetMax))}
                   </p>
                 </div>
               )}
-              {criteria.roomCount && (
+              {searchRequest.roomCountMin && (
                 <div>
                   <p className="text-sm text-muted-foreground">Rooms</p>
-                  <p className="font-medium">{criteria.roomCount}</p>
-                </div>
-              )}
-              {criteria.viewType && (
-                <div>
-                  <p className="text-sm text-muted-foreground">View</p>
                   <p className="font-medium">
-                    {VIEW_TYPE_LABELS[criteria.viewType as ViewType]}
+                    {searchRequest.roomCountMin}
+                    {searchRequest.roomCountMax && searchRequest.roomCountMax !== searchRequest.roomCountMin &&
+                      ` - ${searchRequest.roomCountMax}`}
                   </p>
                 </div>
               )}
             </div>
 
-            {criteria.features && criteria.features.length > 0 && (
+            {searchRequest.mustHaveFeatures?.length > 0 && (
               <div className="mt-4">
                 <p className="mb-2 text-sm text-muted-foreground">Required Features</p>
                 <div className="flex flex-wrap gap-2">
-                  {criteria.features.map((feature) => (
+                  {searchRequest.mustHaveFeatures.map((feature) => (
                     <Badge key={feature} variant="outline">
                       {LISTING_FEATURE_LABELS[feature as ListingFeature] || feature}
                     </Badge>
