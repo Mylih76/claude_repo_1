@@ -62,18 +62,18 @@ export function SearchRequestsTable({ searchRequests }: SearchRequestsTableProps
                     <span className="text-muted-foreground">Search criteria</span>
                   )}
                 </Link>
-                {request.criteria.listingType && (
+                {request.listingType && (
                   <p className="text-sm text-muted-foreground capitalize">
-                    {request.criteria.listingType}
-                    {request.criteria.roomCount && ` | ${request.criteria.roomCount}`}
+                    {request.listingType}
+                    {request.roomCountMin && ` | ${request.roomCountMin}`}
                   </p>
                 )}
               </td>
               <td className="px-4 py-3 text-sm text-muted-foreground">
                 {[
-                  request.criteria.neighborhood,
-                  request.criteria.district,
-                  request.criteria.city,
+                  request.neighborhoods?.[0],
+                  request.districts?.[0],
+                  request.cities?.[0],
                 ]
                   .filter(Boolean)
                   .join(', ') || '-'}
