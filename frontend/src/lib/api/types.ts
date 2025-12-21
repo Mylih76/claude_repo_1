@@ -176,40 +176,54 @@ export interface ListingFilters {
 
 export type SearchRequestStatus = 'active' | 'paused' | 'fulfilled' | 'expired';
 
-export interface SearchCriteria {
-  city?: string;
-  district?: string;
-  neighborhood?: string;
+// Matches backend CreateSearchRequestDto structure
+export interface CreateSearchRequestRequest {
+  rawText?: string;
   listingType?: ListingType;
-  minPrice?: number;
-  maxPrice?: number;
-  roomCount?: string;
-  viewType?: ViewType;
-  features?: string[];
   propertyTypes?: PropertyType[];
+  budgetMin?: number;
+  budgetMax?: number;
+  currency?: string;
   sqmMin?: number;
   sqmMax?: number;
+  roomCountMin?: string;
+  roomCountMax?: string;
+  cities?: string[];
+  districts?: string[];
+  neighborhoods?: string[];
+  mustHaveFeatures?: string[];
+  niceToHaveFeatures?: string[];
+  notes?: string;
 }
 
+export interface UpdateSearchRequestRequest extends Partial<CreateSearchRequestRequest> {
+  status?: SearchRequestStatus;
+}
+
+// For displaying in UI (matches backend SearchRequest model)
 export interface SearchRequest {
   id: string;
   userId: string;
   rawText: string | null;
-  criteria: SearchCriteria;
-  status?: SearchRequestStatus;
+  listingType: ListingType | null;
+  propertyTypes: PropertyType[];
+  budgetMin: string | null;
+  budgetMax: string | null;
+  currency: string | null;
+  sqmMin: number | null;
+  sqmMax: number | null;
+  roomCountMin: string | null;
+  roomCountMax: string | null;
+  cities: string[];
+  districts: string[];
+  neighborhoods: string[];
+  mustHaveFeatures: string[];
+  niceToHaveFeatures: string[];
+  notes: string | null;
+  status: SearchRequestStatus;
   createdAt: string;
   updatedAt?: string;
-}
-
-export interface CreateSearchRequestRequest {
-  rawText?: string;
-  criteria: SearchCriteria;
-}
-
-export interface UpdateSearchRequestRequest {
-  rawText?: string;
-  criteria?: SearchCriteria;
-  status?: SearchRequestStatus;
+  matches?: MatchResult[];
 }
 
 export interface SearchRequestFilters {
